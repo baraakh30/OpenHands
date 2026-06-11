@@ -177,12 +177,18 @@ class ProcessSandboxService(SandboxService):
             process = psutil.Process(process_info.pid)
             if process.is_running():
                 status = process.status()
-                if status == psutil.STATUS_RUNNING:
-                    return SandboxStatus.RUNNING
-                elif status == psutil.STATUS_STOPPED:
+                if status == psutil.STATUS_STOPPED:
                     return SandboxStatus.PAUSED
+                elif status in (
+                    psutil.STATUS_DEAD,
+                    psutil.STATUS_ZOMBIE,
+                ):
+                    return SandboxStatus.MISSING
                 else:
-                    return SandboxStatus.STARTING
+                    # On Linux, server processes are typically STATUS_SLEEPING
+                    # (waiting for I/O), not STATUS_RUNNING (actively on CPU).
+                    # Treat any live, non-stopped process as RUNNING.
+                    return SandboxStatus.RUNNING
             else:
                 return SandboxStatus.MISSING
         except (psutil.NoSuchProcess, psutil.AccessDenied):
