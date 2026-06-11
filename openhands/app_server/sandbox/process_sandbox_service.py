@@ -350,9 +350,22 @@ class ProcessSandboxService(SandboxService):
 
         # Wait for server to be ready
         if not await self._wait_for_server_ready(port):
-            # Clean up if server didn't start properly
+            # Capture log contents and exit code before cleanup
+            log_path = os.path.join(working_dir, '.openhands-agent-server.log')
+            log_tail = ''
+            try:
+                with open(log_path) as lf:
+                    lines = lf.readlines()
+                    log_tail = ''.join(lines[-50:]).strip()
+            except Exception:
+                pass
+            exit_code = process.poll()
+            exit_info = f' (exit code {exit_code})' if exit_code is not None else ' (still running, health check timed out)'
             await self.delete_sandbox(sandbox_id)
-            raise SandboxError('Agent Server Failed to start properly')
+            detail = f'Agent Server Failed to start properly{exit_info}'
+            if log_tail:
+                detail += f'\nAgent server log (last 50 lines):\n{log_tail}'
+            raise SandboxError(detail)
 
         return await self._process_to_sandbox_info(sandbox_id, process_info)
 
