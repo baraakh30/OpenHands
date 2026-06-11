@@ -39,9 +39,12 @@ export function extractBaseHost(
 export function extractPathPrefix(
   conversationUrl: string | null | undefined,
 ): string {
-  if (!conversationUrl || conversationUrl.startsWith("/")) return "";
+  if (!conversationUrl) return "";
   try {
-    const { pathname } = new URL(conversationUrl);
+    // Handle both absolute URLs and relative paths (e.g., /runtime/8000/api/conversations/...)
+    const pathname = conversationUrl.startsWith("/")
+      ? conversationUrl
+      : new URL(conversationUrl).pathname;
     // The SDK serves both LLM and ACP conversations on the unified
     // ``/api/conversations`` route, so a single regex anchored at a segment
     // boundary is enough. ``$|/`` stops at the ``/{id}`` segment that

@@ -552,7 +552,7 @@ class LiveStatusAppConversationService(AppConversationServiceBase):
         conversation_url = None
         session_api_key = None
         if sandbox and sandbox.exposed_urls:
-            conversation_url = next(
+            agent_server_url = next(
                 (
                     exposed_url.url
                     for exposed_url in sandbox.exposed_urls
@@ -560,8 +560,16 @@ class LiveStatusAppConversationService(AppConversationServiceBase):
                 ),
                 None,
             )
-            if conversation_url:
-                conversation_url += f'/api/conversations/{app_conversation_info.id.hex}'
+            if agent_server_url:
+                try:
+                    from urllib.parse import urlparse
+                    parsed = urlparse(agent_server_url)
+                    port = parsed.port or (443 if parsed.scheme == 'https' else 80)
+                    # Use a relative proxy path so browsers connect via the app
+                    # server's public hostname rather than the internal agent port.
+                    conversation_url = f'/runtime/{port}/api/conversations/{app_conversation_info.id.hex}'
+                except Exception:
+                    conversation_url = agent_server_url + f'/api/conversations/{app_conversation_info.id.hex}'
             session_api_key = sandbox.session_api_key
 
         return AppConversation(
