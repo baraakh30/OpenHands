@@ -82,9 +82,7 @@ from openhands.app_server.user.specifiy_user_context import USER_CONTEXT_ATTR
 from openhands.app_server.user.user_context import UserContext
 from openhands.app_server.user_auth import get_user_settings
 from openhands.app_server.utils.dependencies import get_dependencies
-from openhands.app_server.utils.docker_utils import (
-    replace_localhost_hostname_for_docker,
-)
+
 from openhands.sdk.skills import KeywordTrigger, TaskTrigger
 from openhands.sdk.workspace.remote.async_remote_workspace import AsyncRemoteWorkspace
 
@@ -201,8 +199,6 @@ async def _get_agent_server_context(
             status_code=status.HTTP_404_NOT_FOUND,
             content={'error': 'Agent server URL not found in sandbox'},
         )
-
-    agent_server_url = replace_localhost_hostname_for_docker(agent_server_url)
 
     return AgentServerContext(
         conversation=conversation,
@@ -543,8 +539,6 @@ async def send_message_to_conversation(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail='Agent server URL not found in sandbox.',
         )
-
-    agent_server_url = replace_localhost_hostname_for_docker(agent_server_url)
 
     # Send message to agent server
     try:
@@ -1121,8 +1115,6 @@ async def read_conversation_file(
 
     if not agent_server_url:
         return ''
-
-    agent_server_url = replace_localhost_hostname_for_docker(agent_server_url)
 
     # Create remote workspace
     remote_workspace = AsyncRemoteWorkspace(
