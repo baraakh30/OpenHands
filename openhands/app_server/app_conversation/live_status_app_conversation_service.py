@@ -86,9 +86,7 @@ from openhands.app_server.services.jwt_service import JwtService
 from openhands.app_server.settings.llm_profiles import resolve_profile_llm
 from openhands.app_server.user.user_context import UserContext
 from openhands.app_server.user.user_models import UserInfo
-from openhands.app_server.utils.docker_utils import (
-    replace_localhost_hostname_for_docker,
-)
+
 from openhands.app_server.utils.git import ensure_valid_git_branch_name
 from openhands.app_server.utils.llm_metadata import (
     get_llm_metadata,
@@ -869,7 +867,6 @@ class LiveStatusAppConversationService(AppConversationServiceBase):
             for exposed_url in exposed_urls
             if exposed_url.name == AGENT_SERVER
         )
-        agent_server_url = replace_localhost_hostname_for_docker(agent_server_url)
         return agent_server_url
 
     def _inherit_configuration_from_parent(

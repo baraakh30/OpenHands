@@ -8,9 +8,6 @@ from openhands.app_server.sandbox.sandbox_models import (
     SandboxInfo,
     SandboxStatus,
 )
-from openhands.app_server.utils.docker_utils import (
-    replace_localhost_hostname_for_docker,
-)
 
 if TYPE_CHECKING:
     from openhands.app_server.app_conversation.app_conversation_models import (
@@ -58,4 +55,4 @@ def get_agent_server_url_from_sandbox(sandbox: SandboxInfo) -> str:
             f'No {AGENT_SERVER!r} URL found for sandbox {sandbox.id!r}'
         ) from None
 
-    return replace_localhost_hostname_for_docker(agent_server_url)
+    return agent_server_url
