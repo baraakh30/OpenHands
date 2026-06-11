@@ -14,9 +14,7 @@ from openhands.app_server.sandbox.sandbox_models import (
     SandboxStatus,
 )
 from openhands.app_server.services.injector import Injector
-from openhands.app_server.utils.docker_utils import (
-    replace_localhost_hostname_for_docker,
-)
+
 from openhands.sdk.utils.models import DiscriminatedUnionMixin
 from openhands.sdk.utils.paging import page_iterator
 
@@ -181,7 +179,7 @@ class SandboxService(ABC):
 
         for exposed_url in sandbox.exposed_urls:
             if exposed_url.name == AGENT_SERVER:
-                return replace_localhost_hostname_for_docker(exposed_url.url)
+                return exposed_url.url
 
         raise SandboxError(f'No agent server URL found for sandbox: {sandbox.id}')
 
