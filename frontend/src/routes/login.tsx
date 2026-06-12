@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate, useSearchParams, useLocation } from "react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { useIsAuthed } from "#/hooks/query/use-is-authed";
 import { useConfig } from "#/hooks/query/use-config";
 import AuthService from "#/api/auth-service/auth-service.api";
@@ -141,6 +142,7 @@ export default function LoginPage() {
 // ---------------------------------------------------------------------------
 function BasicAuthLoginForm({ returnTo }: { returnTo: string }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState("");
@@ -152,6 +154,9 @@ function BasicAuthLoginForm({ returnTo }: { returnTo: string }) {
     setLoading(true);
     try {
       await AuthService.basicAuthLogin(username, password);
+      // Invalidate the auth cache so root-layout sees the new authenticated
+      // state before navigating — prevents it bouncing back to /login.
+      await queryClient.invalidateQueries({ queryKey: ["user", "authenticated"] });
       navigate(returnTo, { replace: true });
     } catch {
       setError("Invalid username or password.");
