@@ -86,15 +86,11 @@ USER root
 RUN /usr/local/bin/python3 -m pip install --no-cache-dir "pip==${PIP_VERSION}" --break-system-packages
 
 # Install Chromium for browser/Playwright tool support.
-# Install to /home/openhands/.cache/ms-playwright — the path that the
-# openhands-agent-server browser_use tool hardcodes for Linux
-# (Path.home() / ".cache" / "ms-playwright"). PLAYWRIGHT_BROWSERS_PATH
-# directs the playwright CLI to install there; chown makes it readable
-# by the openhands user at runtime.
-ENV PLAYWRIGHT_BROWSERS_PATH=/home/openhands/.cache/ms-playwright
-RUN mkdir -p /home/openhands/.cache/ms-playwright \
-    && /app/.venv/bin/playwright install chromium --with-deps \
-    && chown -R openhands:openhands /home/openhands/.cache/ms-playwright \
+# Run as root so playwright installs to /root/.cache/ms-playwright (its
+# default on Linux). The container runs as root at runtime (SANDBOX_USER_ID=0),
+# so Path.home() == /root and the openhands-agent-server browser tool finds
+# chromium at /root/.cache/ms-playwright/chromium-*/chrome-linux64/chrome.
+RUN /app/.venv/bin/playwright install chromium --with-deps \
     && chown -R openhands:openhands /app/.venv/lib/python3.13/site-packages/playwright/
 
 USER openhands
