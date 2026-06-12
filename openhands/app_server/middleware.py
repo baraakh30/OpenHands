@@ -190,6 +190,14 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
         if auth_header.startswith('Bearer ') and verify_token(auth_header[7:]):
             return await call_next(request)
 
+        # Check X-Session-API-Key — used by agent-server callbacks and API clients
+        # that authenticate via SESSION_API_KEY. If the key matches, pass through
+        # so the route-level check_session_api_key dependency can run normally.
+        import os
+        _session_key = os.getenv('SESSION_API_KEY')
+        if _session_key and request.headers.get('X-Session-API-Key') == _session_key:
+            return await call_next(request)
+
         return Response(
             content='{"detail":"Authentication required"}',
             status_code=401,
