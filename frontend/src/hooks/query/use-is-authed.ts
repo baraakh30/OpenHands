@@ -14,9 +14,7 @@ export const useIsAuthed = () => {
     queryKey: ["user", "authenticated", appMode],
     queryFn: async () => {
       try {
-        // If in OSS mode or authentication succeeds, return true
-        await AuthService.authenticate(appMode!);
-        return true;
+        return await AuthService.authenticate(appMode!);
       } catch (error) {
         // If it's a 401 error, return false (not authenticated)
         if (axios.isAxiosError(error)) {
