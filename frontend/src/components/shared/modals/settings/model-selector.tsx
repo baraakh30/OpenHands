@@ -39,6 +39,7 @@ export function ModelSelector({
     null,
   );
   const [selectedModel, setSelectedModel] = React.useState<string | null>(null);
+  const [modelInputValue, setModelInputValue] = React.useState<string>("");
 
   const { data: providers = [] } = useSearchProviders();
   const {
@@ -72,6 +73,7 @@ export function ModelSelector({
       setLitellmId(currentModel);
       setSelectedProvider(provider || null);
       setSelectedModel(model);
+      setModelInputValue(model);
       onDefaultValuesChanged?.(provider || null, model);
     }
   }, [currentModel]);
@@ -91,6 +93,7 @@ export function ModelSelector({
     }
     setLitellmId(fullModel);
     setSelectedModel(model);
+    setModelInputValue(model);
     onChange?.(selectedProvider, model);
   };
 
@@ -183,12 +186,16 @@ export function ModelSelector({
           aria-label={t(I18nKey.LLM$MODEL)}
           placeholder={t(I18nKey.LLM$SELECT_MODEL_PLACEHOLDER)}
           isClearable={false}
+          allowsCustomValue
+          inputValue={modelInputValue}
+          onInputChange={(value) => {
+            setModelInputValue(value);
+            if (value) handleChangeModel(value);
+          }}
           onSelectionChange={(e) => {
             if (e?.toString()) handleChangeModel(e.toString());
           }}
           isDisabled={isDisabled || !selectedProvider}
-          selectedKey={selectedModel}
-          defaultSelectedKey={selectedModel ?? undefined}
           classNames={{
             popoverContent: "bg-tertiary rounded-xl border border-[#717888]",
           }}
