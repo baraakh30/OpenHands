@@ -84,6 +84,10 @@ RUN python -m pip install --no-cache-dir "pip==${PIP_VERSION}"
 
 USER root
 RUN /usr/local/bin/python3 -m pip install --no-cache-dir "pip==${PIP_VERSION}" --break-system-packages
+
+# Install Chromium for browser/Playwright tool support
+RUN /app/.venv/bin/playwright install chromium --with-deps
+
 USER openhands
 
 COPY --chown=openhands:openhands --chmod=770 ./skills ./skills
