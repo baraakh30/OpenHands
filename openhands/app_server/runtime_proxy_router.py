@@ -95,7 +95,7 @@ async def proxy_websocket(
         async with aiohttp.ClientSession() as session:
             async with session.ws_connect(
                 target_url,
-                timeout=aiohttp.ClientWSTimeout(ws_connect=10),
+                timeout=aiohttp.ClientTimeout(total=None, connect=10),
             ) as ws_agent:
 
                 async def forward_from_agent() -> None:
