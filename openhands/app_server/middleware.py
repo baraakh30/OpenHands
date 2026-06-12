@@ -146,6 +146,13 @@ _AUTH_EXEMPT_PATHS = frozenset({
     '/api/auth/check',
     '/api/auth/login',
     '/api/auth/logout',
+    # Frontend needs this to know whether basic auth is required
+    '/api/v1/config',
+    # Health/readiness probes must reach Railway and load balancers
+    '/alive',
+    '/health',
+    '/ready',
+    '/server_info',
 })
 
 
