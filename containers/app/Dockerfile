@@ -85,8 +85,12 @@ RUN python -m pip install --no-cache-dir "pip==${PIP_VERSION}"
 USER root
 RUN /usr/local/bin/python3 -m pip install --no-cache-dir "pip==${PIP_VERSION}" --break-system-packages
 
-# Install Chromium for browser/Playwright tool support
-RUN /app/.venv/bin/playwright install chromium --with-deps
+# Install Chromium for browser/Playwright tool support.
+# Store browsers under /app so the openhands user can reach them at runtime.
+ENV PLAYWRIGHT_BROWSERS_PATH=/app/.playwright-browsers
+RUN /app/.venv/bin/playwright install chromium --with-deps \
+    && chown -R openhands:openhands /app/.playwright-browsers \
+    && chown -R openhands:openhands /app/.venv/lib/python3.13/site-packages/playwright/
 
 USER openhands
 
