@@ -185,12 +185,15 @@ export default function MainApp() {
   const isLoading = config.isLoading || isAuthLoading;
 
   // Only decide to redirect AFTER loading completes
+  const isOssBasicAuth =
+    config.data?.app_mode === "oss" && config.data?.basic_auth_required === true;
+
   const shouldRedirectToLogin =
     !isLoading &&
     !isAuthed &&
     !isAuthError &&
     !isOnIntermediatePage &&
-    config.data?.app_mode === "saas" &&
+    (config.data?.app_mode === "saas" || isOssBasicAuth) &&
     !loginMethodExists;
 
   React.useEffect(() => {

@@ -14,11 +14,25 @@ class AuthService {
   static async authenticate(
     appMode: WebClientConfig["app_mode"],
   ): Promise<boolean> {
-    if (appMode === "oss") return true;
+    if (appMode === "oss") {
+      // Check whether the server has basic auth configured
+      const { data } = await openHands.get<{
+        required: boolean;
+        authenticated: boolean;
+      }>("/api/auth/check");
+      return data.authenticated;
+    }
 
     // Just make the request, if it succeeds (no exception thrown), return true
     await openHands.post<AuthenticateResponse>("/api/authenticate");
     return true;
+  }
+
+  static async basicAuthLogin(
+    username: string,
+    password: string,
+  ): Promise<void> {
+    await openHands.post("/api/auth/login", { username, password });
   }
 
   /**

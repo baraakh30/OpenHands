@@ -139,3 +139,52 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
     def _is_sandbox_resume_request(self, request: StarletteRequest) -> bool:
         return request.method == 'POST' and bool(_RESUME_RE.match(request.url.path))
+
+
+# Paths that are always accessible without authentication
+_AUTH_EXEMPT_PATHS = frozenset({
+    '/api/auth/check',
+    '/api/auth/login',
+    '/api/auth/logout',
+})
+
+
+class BasicAuthMiddleware(BaseHTTPMiddleware):
+    """Block all /api/* routes when OPENHANDS_BASIC_AUTH_* vars are set.
+
+    Static files (frontend SPA) are always served so the login page can load.
+    Auth endpoints are always exempt so the browser can obtain a session token.
+    """
+
+    async def dispatch(
+        self, request: StarletteRequest, call_next: RequestResponseEndpoint
+    ) -> Response:
+        from openhands.app_server.auth.basic_auth_service import (
+            COOKIE_NAME,
+            ENABLED,
+            verify_token,
+        )
+
+        if not ENABLED:
+            return await call_next(request)
+
+        path = request.url.path
+
+        # Always exempt: auth endpoints and non-API paths (static SPA files)
+        if path in _AUTH_EXEMPT_PATHS or not path.startswith('/api/'):
+            return await call_next(request)
+
+        # Check session cookie
+        if verify_token(request.cookies.get(COOKIE_NAME)):
+            return await call_next(request)
+
+        # Check Authorization: Bearer header (useful for API clients)
+        auth_header = request.headers.get('Authorization', '')
+        if auth_header.startswith('Bearer ') and verify_token(auth_header[7:]):
+            return await call_next(request)
+
+        return Response(
+            content='{"detail":"Authentication required"}',
+            status_code=401,
+            media_type='application/json',
+        )

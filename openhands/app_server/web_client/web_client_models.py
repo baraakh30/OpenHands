@@ -78,4 +78,5 @@ class WebClientConfig(DiscriminatedUnionMixin):
     # the backend always prefers the env credentials at runtime.
     jira_dc_service_account_managed: bool = False
     jira_dc_service_account_email: str | None = None
+    basic_auth_required: bool = False
     jira_dc_service_account_config_error: str | None = None

@@ -76,4 +76,6 @@ export interface WebClientConfig {
   jira_dc_service_account_email?: string | null;
   /** Non-secret Jira DC service-account env config error, if any. */
   jira_dc_service_account_config_error?: string | null;
+  /** True when OPENHANDS_BASIC_AUTH_USER + PASSWORD are set server-side. */
+  basic_auth_required?: boolean;
 }

@@ -264,5 +264,9 @@ class DefaultWebClientConfigInjector(WebClientConfigInjector):
                 self.jira_dc_service_account_config_error
             ),
             acp_providers=self.acp_providers,
+            basic_auth_required=bool(
+                os.getenv('OPENHANDS_BASIC_AUTH_USER')
+                and os.getenv('OPENHANDS_BASIC_AUTH_PASSWORD')
+            ),
         )
         return result

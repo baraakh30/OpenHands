@@ -15,10 +15,12 @@ from fastapi.responses import JSONResponse
 
 from openhands.app_server import v1_router
 from openhands.app_server.runtime_proxy_router import router as runtime_proxy_router
+from openhands.app_server.auth.auth_router import router as auth_router
 from openhands.app_server.config import get_app_lifespan_service
 from openhands.app_server.integrations.service_types import AuthenticationError
 from openhands.app_server.mcp.mcp_router import init_tavily_proxy, mcp_server
 from openhands.app_server.middleware import (
+    BasicAuthMiddleware,
     CacheControlMiddleware,
     InMemoryRateLimiter,
     LocalhostCORSMiddleware,
@@ -69,6 +71,7 @@ async def authentication_error_handler(request: Request, exc: AuthenticationErro
     )
 
 
+app.include_router(auth_router)
 app.include_router(v1_router.router)
 app.include_router(health_router)
 app.include_router(runtime_proxy_router)
@@ -80,6 +83,7 @@ if os.getenv('SERVE_FRONTEND', 'true').lower() == 'true':
             '/', SPAStaticFiles(directory='./frontend/build', html=True), name='dist'
         )
 
+app.add_middleware(BasicAuthMiddleware)
 app.add_middleware(LocalhostCORSMiddleware)
 app.add_middleware(CacheControlMiddleware)
 app.add_middleware(
